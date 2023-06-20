@@ -9,3 +9,79 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String?
+  username String? @unique @default(uuid())
+  email String? @unique
+  image String?
+  emailVerified DateTime?
+  hashedPassword String?
+  role String @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  conversationIds String[] @db.ObjectId
+  conversations Conversation[] @relation("UserConvos", fields: [conversationIds], references: [id])
+
+  pinnedIds String[] @db.ObjectId
+  pinned Conversation[] @relation("Pinned", fields: [conversationIds], references: [id])
+
+  accounts Account[]
+  admin Conversation[]
+  messages Message[]
+}
+
+model Account {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  type String
+  provider String
+  providerAccountId String
+  refresh_token String? @db.String
+  access_token String? @db.String
+  expires_at Int?
+  token_type String?
+  scope String?
+  id_token String? @db.String
+  session_state String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique ([provider, providerAccountId])
+}
+
+model Conversation {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String?
+  isGroup Boolean
+  lastMessageAt DateTime @default(now())
+  image String?
+
+  memberIds String[] @db.ObjectId
+  members User[] @relation("UserConvos", fields: [memberIds], references: [id])
+
+  adminId String? @db.ObjectId
+  admin User? @relation(fields: [adminId], references: [id])
+
+  pinnedByUserIds String[] @db.ObjectId
+  pinnedByUsers User[] @relation("Pinned", fields: [pinnedByUserIds], references: [id])
+
+  messages Message[]
+
+}
+
+model Message {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  text String?
+  image String?
+  createdAt DateTime @default(now())
+
+  conversationId String @db.ObjectId
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+
+  senderId String @db.ObjectId
+  sender User @relation(fields: [senderId], references: [id])
+}
+
