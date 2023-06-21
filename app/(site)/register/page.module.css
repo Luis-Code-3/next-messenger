@@ -1,0 +1,36 @@
+.secContainer {
+    /* border: 1px solid red; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+  }
+  
+  .registerContainer {
+    background-color: rgb(255, 255, 255, .03);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 35%;
+    padding: 2rem;
+    gap: 1.5rem;
+  }
+
+  .logoSvg {
+    width: 60px;
+    height: 60px;
+    color: rgb(100, 106, 226)
+  }
+  
+  .loginPage {
+    color: rgb(255, 255, 255, .4);
+  }
+  
+  .loginPage a {
+    text-decoration: underline;
+    color: rgb(157, 131, 237);
+  }
+  
+  

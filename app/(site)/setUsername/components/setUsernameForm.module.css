@@ -1,0 +1,49 @@
+.formContainer {
+    /* border: 1px solid red; */
+    display: flex;
+    flex-direction: column;
+    gap: .7rem;
+    width: 40%;
+}
+
+.nameBox {
+    /* border: 1px solid yellow; */
+    border-radius: 5px;
+    display: flex;
+    padding: .8rem 1rem;
+    width: 100%;
+    background-color: rgb(205, 191, 191, .2);
+    gap: .8rem;
+}
+
+.nameBox div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.nameBox input {
+    border: none;
+    background-color: transparent;
+    outline: none;
+    font-size: 100%;
+    flex-grow: 1;
+}
+
+.newButton {
+        /* margin-top: .5rem; */
+        border-radius: 5px;
+        border: none;
+        padding: 1rem;
+        background: linear-gradient(to right, rgb(97, 72, 237, .8), rgb(75, 47, 147, .8), rgb(60, 40, 87, .8));
+        background-color: rgb(0, 0, 0, 0);
+        font-size: 110%;
+        font-weight: 600;
+        text-align: center;
+        cursor: pointer;
+        transition: all .1s linear;
+}
+
+.newButton:hover {
+    background-color: rgb(0, 0, 0, 1);
+}
