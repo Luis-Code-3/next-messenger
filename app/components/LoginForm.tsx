@@ -5,6 +5,7 @@ import { useState } from "react"
 import { toast } from "react-hot-toast"
 import { signIn } from "next-auth/react"
 import { ClipLoader, PropagateLoader } from "react-spinners"
+import { useSearchParams } from "next/navigation"
 
 const LoginForm = () => {
 
@@ -12,6 +13,8 @@ const LoginForm = () => {
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isNavigating, setIsNavigating] = useState(false);
+    const searchParams = useSearchParams();
+    
 
     const handleLogin = async (e:any) => {
         //loading true
@@ -19,9 +22,14 @@ const LoginForm = () => {
         e.preventDefault();
         signIn('credentials', {email, password, redirect: false})
             .then((callback) => {
-                if(callback?.error) {
-                    toast.error("Invalid Credentials");
+                if(callback?.error === "Invalid Credentials" || callback?.error === "Missing Fields") {
+                    toast.error(callback?.error);
                 }
+
+                if(callback?.ok && (callback?.error === "OAuthAccountNotLinked" || callback?.error === "access_denied")) {
+                  setIsNavigating(true); // might remove this, this is to prevent isLoading false flicker
+                  window.location.href = '/dashboard';
+                } // needed to add this because of a bug that was created when the url has an error query, ends up showing in the callback object
 
                 if(callback?.ok && !callback?.error) {
                     setIsNavigating(true); // might remove this, this is to prevent isLoading false flicker
@@ -42,6 +50,15 @@ const LoginForm = () => {
                 setIsLoading(false);
             })
     };
+
+    const errorMessage = () => {
+      const errorType = searchParams.get('error');
+      if(errorType === 'OAuthAccountNotLinked') {
+        return <p className={styles.errorMessage}>Confirm your Identity. Sign In with the same Account you Originally signed in with</p>
+      }
+
+      return <p className={styles.errorMessage}>Authorization Rejected. Try Again</p>
+    }
 
 
 
@@ -66,6 +83,13 @@ const LoginForm = () => {
         {/* <button className={styles.logButton} type='submit'>Login</button> */}
     </form>
 
+      {
+        searchParams.get('error') ?
+        errorMessage()
+        :
+        null
+      }
+
       <div className={styles.orLine}></div>
 
       <div className={styles.socialContainer}>
@@ -88,3 +112,11 @@ const LoginForm = () => {
 }
 
 export default LoginForm
+
+//?error=access_denied
+
+//error=OAuthAccountNotLinked happens when we already have a social login with the same email as another social login wants to register
+
+//error=OAuthAccountNotLinked happens when we already have a regular login with the same email as a social login wants to reigster
+
+//error=OAuthAccountNotLinked happens when i try to do a google login with an already github login with same email

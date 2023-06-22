@@ -6,6 +6,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcrypt";
+import { MyAdapterUser } from "@/app/types/next-auth";
 
 export const authOptions: AuthOptions = {
     adapter: PrismaAdapter(prisma),
@@ -58,20 +59,28 @@ export const authOptions: AuthOptions = {
         strategy: "jwt"
     },
     callbacks: {
-        async jwt({token, user, account, profile, trigger}) {
+        async jwt({token, user, account, profile, trigger, session}) {
             if (trigger === 'update') {
                 delete token.isNewUser;
-            }
+                token.username = session?.username;
+            } // deletes the isNewUser field so we arent navigating to that page anymore and it updates the username in the token
 
-            if(trigger === 'signUp' && (account?.provider === 'github' || account?.provider === 'google')) {
-                token.isNewUser = true;
+            if (user) {
+                let myUser = user as MyAdapterUser
+                token.username = myUser.username
+                if(trigger === 'signUp' && (account?.provider === 'github' || account?.provider === 'google')) {
+                    token.isNewUser = true;
+                }
             }
 
             return token;
         },
         async session({token, session, user}) {
-            if(token.isNewUser) {
-                session.user.isNewUser = token.isNewUser
+            if(token) {
+                session.user.username = token.username
+                if(token.isNewUser) {
+                    session.user.isNewUser = token.isNewUser
+                }
             }
 
             return session;
