@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 import prisma from "../../lib/prismadb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function POST(request: Request) {
+    const session = await getServerSession(authOptions);
     const {username, email} = await request.json();
 
     if(!username) {
         return NextResponse.json({message: "Field is Required."}, {status: 400});
     }
+
+    if(session?.user.email !== email) {
+        return NextResponse.json({message: "Not Authorized"}, {status: 401})
+    } // prevents another user from changing your username
 
     try {
         const existUser = await prisma.user.findUnique({

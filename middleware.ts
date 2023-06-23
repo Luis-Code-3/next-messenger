@@ -12,6 +12,8 @@ export default withAuth(
                 return NextResponse.json({message: "Must be Logged In"}, {status: 400})
             }
 
+            // add rate limiter here later
+
             return NextResponse.next();
         }
         
