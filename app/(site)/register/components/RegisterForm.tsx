@@ -20,7 +20,7 @@ const RegisterForm = () => {
         setIsLoading(true);
         e.preventDefault();
         try {
-            await axios.post("http://localhost:3000/api/register", {username, email, name, password});
+            await axios.post("http://localhost:3000/api/users/register", {username, email, name, password});
             setIsNavigating(true); //might remove cause it could cause issues if there is an error via signIn
             signIn('credentials', {email, password, callbackUrl: '/dashboard'})
         } catch (err: any) {

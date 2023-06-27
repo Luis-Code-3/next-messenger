@@ -8,6 +8,8 @@ export default withAuth(
         const isAuth = await getToken({req});
 
         if (pathname.startsWith('/api')) {
+            if(pathname === '/api/users/register') return NextResponse.next();
+
             if(!isAuth) {
                 return NextResponse.json({message: "Must be Logged In"}, {status: 400})
             }
