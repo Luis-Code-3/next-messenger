@@ -2,13 +2,15 @@ import { NextResponse } from "next/server";
 import prisma from "../../lib/prismadb"
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
+import getCurrentUser from "@/app/actions/getCurrentUser";
 
 export async function POST(request: Request) {
     const {text, image, conversation} = await request.json();
-    const session = await getServerSession(authOptions);
+    // const session = await getServerSession(authOptions);
+    const currentUser = await getCurrentUser();
 
     try {
-        if(!conversation || !session?.user.id || (!text && !image)) {
+        if(!conversation || !currentUser?.id || (!text && !image)) {
             return NextResponse.json({message: "Invaid Data, Provide Required Information"}, {status: 400});
         }
 
@@ -25,7 +27,7 @@ export async function POST(request: Request) {
             return NextResponse.json({message: "Conversation does not exist"}, {status: 400});
         }
 
-        if(!existingConversation.members.some((member) => member.email === session?.user.email)) {
+        if(!existingConversation.members.some((member) => member.email === currentUser?.email)) {
             return NextResponse.json({message: "Cannot send a Message to a Conversation you aren't apart of."}, {status: 401});
         }
 
@@ -37,7 +39,7 @@ export async function POST(request: Request) {
                     connect: {id: conversation}
                 },
                 sender: {
-                    connect: {id: session?.user.id}
+                    connect: {id: currentUser?.id}
                 }
             },
             include: {

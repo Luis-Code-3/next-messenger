@@ -1,6 +1,12 @@
 import prisma from '../lib/prismadb';
+import getCurrentUser from './getCurrentUser';
 
-const getConversations = async (userId: string) => {
+const getConversations = async () => {
+    const currentUser = await getCurrentUser();
+
+    if(!currentUser?.id) {
+        return [];
+    }
 
     try {
         const conversations = await prisma.conversation.findMany({
@@ -9,7 +15,7 @@ const getConversations = async (userId: string) => {
             },
             where: {
                 memberIds: {
-                    has: userId
+                    has: currentUser?.id
                 }
             },
             include: {

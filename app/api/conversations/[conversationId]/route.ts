@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "../../../lib/prismadb"
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import getCurrentUser from "@/app/actions/getCurrentUser";
 
 type IParams = {
     conversationId: string
@@ -9,10 +10,13 @@ type IParams = {
 
 export async function DELETE(request: Request, {params}: {params: IParams}) {
     const conversationId = params.conversationId;
-    const session = await getServerSession(authOptions);
+    // const session = await getServerSession(authOptions);
+    const currentUser = await getCurrentUser();
 
 
     try {
+        // Need to check if conversationId exists
+
         const existingConversation = await prisma.conversation.findUnique({
             where: {
                 id: conversationId
@@ -27,12 +31,12 @@ export async function DELETE(request: Request, {params}: {params: IParams}) {
             return NextResponse.json({message: "Conversation does not exist."}, {status: 400})
         }
 
-        if(!existingConversation.members.some((member) => member.email === session?.user.email)) {
+        if(!existingConversation.members.some((member) => member.email === currentUser?.email)) {
             return NextResponse.json({message: "Cannot delete a conversation you aren't apart of."}, {status: 400})
         }
 
         if(existingConversation.isGroup) {
-            if(existingConversation.admin?.email !== session?.user.email) {
+            if(existingConversation.adminId !== currentUser?.id) {
                 return NextResponse.json({message: "Only Group Admin can Delete Conversation."}, {status: 400})
             }
         }
@@ -41,7 +45,7 @@ export async function DELETE(request: Request, {params}: {params: IParams}) {
             where: {
                 id: conversationId,
                 memberIds: {
-                    has: session?.user.id //check here again
+                    has: currentUser?.id //check here again and disconnect it
                 }
             }
         });

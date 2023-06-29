@@ -2,16 +2,18 @@ import { NextResponse } from "next/server";
 import prisma from "../../../lib/prismadb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import getCurrentUser from "@/app/actions/getCurrentUser";
 
 export async function POST(request: Request) {
-    const session = await getServerSession(authOptions);
+    // const session = await getServerSession(authOptions);
+    const currentUser = await getCurrentUser();
     const {username, email} = await request.json();
 
     if(!username) {
         return NextResponse.json({message: "Field is Required."}, {status: 400});
     }
 
-    if(session?.user.email !== email) {
+    if(currentUser?.email !== email) {
         return NextResponse.json({message: "Not Authorized"}, {status: 401})
     } // prevents another user from changing your username
 

@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import prisma from "../../../lib/prismadb"
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import getCurrentUser from "@/app/actions/getCurrentUser";
 
 export async function POST(request: Request) {
     const {userId ,conversationId} = await request.json();
-    const session = await getServerSession(authOptions);
+    // const session = await getServerSession(authOptions);
+    const currentUser = await getCurrentUser();
 
 
     try {
@@ -31,7 +33,7 @@ export async function POST(request: Request) {
 
         if(!existingConversation.isGroup) return NextResponse.json({message: "Can only add members to groups"}, {status: 400});
 
-        if(session?.user.id !== existingConversation.admin?.id) return NextResponse.json({message: "Only Admins can add members"}, {status: 400});
+        if(currentUser?.id !== existingConversation.admin?.id) return NextResponse.json({message: "Only Admins can add members"}, {status: 400});
 
         if(existingConversation.memberIds.includes(userId)) return NextResponse.json({message: "User already a member"}, {status: 400});
 

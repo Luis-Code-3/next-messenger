@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import prisma from "../../../lib/prismadb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import getCurrentUser from "@/app/actions/getCurrentUser";
 
 export async function POST(request: Request) {
     const {conversationId} = await request.json();
-    const session = await getServerSession(authOptions);
+    // const session = await getServerSession(authOptions);
+    const currentUser = await getCurrentUser();
 
 
 
@@ -28,14 +30,14 @@ export async function POST(request: Request) {
             return NextResponse.json({message: "Conversation does not exist."}, {status: 400})
         }
 
-        if(!existingConversation.members.some((member) => member.email === session?.user.email)) {
+        if(!existingConversation.members.some((member) => member.email === currentUser?.email)) {
             return NextResponse.json({message: "You cannot pin a conversation you are not apart of."}, {status: 401})
         }
 
         // update user's pinned convos
         const updateUser = await prisma.user.update({
             where: {
-                id: session?.user.id
+                id: currentUser?.id
             },
             data: {
                 pinnedIds: {

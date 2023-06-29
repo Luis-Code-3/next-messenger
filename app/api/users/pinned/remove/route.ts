@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prismadb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import getCurrentUser from "@/app/actions/getCurrentUser";
 
 export async function POST(request: Request) {
     const {conversationId} =  await request.json();
-    const session = await getServerSession(authOptions);
+    // const session = await getServerSession(authOptions);
+    const currentUser = await getCurrentUser();
     
     try {
         if(!conversationId) {
@@ -25,24 +27,24 @@ export async function POST(request: Request) {
             return NextResponse.json({message: "Conversation does not exist."}, {status: 400})
         }
 
-        if(!existingConversation.members.some((member) => member.email === session?.user.email)) {
+        if(!existingConversation.members.some((member) => member.email === currentUser?.email)) {
             return NextResponse.json({message: "You cannot remove a pinned conversation you are not apart of."}, {status: 401})
         }
 
-        const currentUser = await prisma.user.findUnique({
+        const currentUserPinned = await prisma.user.findUnique({
             where: {
-                id: session?.user.id
+                id: currentUser?.id
             },
             include: {
                 pinned: true
             }
         });
 
-        const newPinnedIds = currentUser?.pinnedIds.filter(id => id !== conversationId);
+        const newPinnedIds = currentUserPinned?.pinnedIds.filter(id => id !== conversationId);
 
         const updateUser = await prisma.user.update({
             where: {
-                id: session?.user.id
+                id: currentUser?.id
             },
             data: {
                 pinnedIds: {
@@ -60,7 +62,7 @@ export async function POST(request: Request) {
         });
 
         const newPinnedByUserIds = existingConversation.pinnedByUserIds.filter((id) => {
-            return id !== session?.user.id
+            return id !== currentUser?.id
         });
 
         const updateConversation = await prisma.conversation.update({
@@ -73,7 +75,7 @@ export async function POST(request: Request) {
                 },
                 pinnedByUsers: {
                     disconnect: {
-                        id: session?.user.id
+                        id: currentUser?.id
                     }
                 }
             }

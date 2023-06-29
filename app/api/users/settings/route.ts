@@ -3,11 +3,13 @@ import prisma from "../../../lib/prismadb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { User } from "@prisma/client";
+import getCurrentUser from "@/app/actions/getCurrentUser";
 
 export async function POST(request: Request) {
     const {name, username, image} = await request.json();
     const updateData: Partial<User>  = {};
-    const session = await getServerSession(authOptions);
+    // const session = await getServerSession(authOptions);
+    const currentUser = await getCurrentUser();
 
     try {
         if(username) {
@@ -39,7 +41,7 @@ export async function POST(request: Request) {
 
         const updatedUser = await prisma.user.update({
             where: {
-                id: session?.user.id
+                id: currentUser?.id
             },
             data: updateData
         })
