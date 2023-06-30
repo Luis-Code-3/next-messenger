@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../lib/prismadb";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
 import { User } from "@prisma/client";
 import getCurrentUser from "@/app/actions/getCurrentUser";
 
 export async function POST(request: Request) {
     const {name, username, image} = await request.json();
     const updateData: Partial<User>  = {};
-    // const session = await getServerSession(authOptions);
     const currentUser = await getCurrentUser();
 
-    try {
+    try { 
+
+        // Checks to see if a user is a logged in / there is a current user
+        if(!currentUser?.id) return NextResponse.json({message: "Not Authorized"}, {status: 400});
+
         if(username) {
             const existUsername = await prisma.user.findUnique({
                 where: {
@@ -19,22 +20,11 @@ export async function POST(request: Request) {
                 }
             });
 
+            // Checks to see if the username is already taken
             if(existUsername) return NextResponse.json({message: "Username Taken"}, {status: 400});
 
             updateData.username = username;
         }
-
-        // if(email) {
-        //     const existEmail = await prisma.user.findUnique({
-        //         where: {
-        //             email
-        //         }
-        //     });
-
-        //     if(existEmail) return NextResponse.json({message: "Email Taken"}, {status: 400});
-
-        //     updateData.email = email;
-        // }
 
         if (image) updateData.image = image;
         if (name) updateData.name = name;
@@ -52,3 +42,10 @@ export async function POST(request: Request) {
         return NextResponse.json({message: "Internal Server Error"}, {status: 500})
     }
 }
+
+
+// Test: Does it pass these?
+// 1. Must be logged in (PASS)
+// 2. Other users cannot change your profile details (PASS (uses current user))
+// 3. Is there a current user (PASS)
+// 4. Cannot change to a username that already exists (PASS)
