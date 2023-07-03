@@ -23,7 +23,7 @@ const getUsers = async () => {
         return users;
     } catch (error) {
         console.log(error);
-        return null  
+        return []  
     }
 }
 

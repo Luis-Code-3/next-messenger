@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     try {
 
         // Checks to see if a user is a logged in / there is a current user
-        if(!currentUser?.id) return NextResponse.json({message: "Not Authorized"}, {status: 400});
+        if(!currentUser?.id) return NextResponse.json({message: "Not Authorized"}, {status: 401});
 
         // Checks to see if the required fields are provided
         if(!conversationId || (!text && !image)) {
@@ -20,19 +20,19 @@ export async function POST(request: Request) {
             where: {
                 id: conversationId
             },
-            include: {
-                members: true
+            select: {
+                memberIds: true
             }
         });
 
         // Checks to see if conversation exists
         if(!existingConversation) {
-            return NextResponse.json({message: "Conversation does not exist"}, {status: 400});
+            return NextResponse.json({message: "Conversation does not exist"}, {status: 404});
         }
 
         // Checks to see if current user is apart of conversation
-        if(!existingConversation.members.some((member) => member.email === currentUser?.email)) {
-            return NextResponse.json({message: "Cannot send a Message to a Conversation you aren't apart of."}, {status: 401});
+        if(!existingConversation.memberIds.some((memberId) => memberId === currentUser?.id)) {
+            return NextResponse.json({message: "Cannot send a Message to a Conversation you aren't apart of."}, {status: 403});
         }
 
         const newMessage =  await prisma.message.create({
@@ -46,8 +46,10 @@ export async function POST(request: Request) {
                     connect: {id: currentUser?.id}
                 }
             },
-            include: {
-                sender: true
+            select: {
+                id: true,
+                text: true,
+                senderId: true
             }
         });
 
@@ -63,13 +65,16 @@ export async function POST(request: Request) {
                     }
                 }
             },
-            include: {
-                members: true
+            select: {
+                id: true
             }
         });
 
         return NextResponse.json(newMessage, {status: 201});
     } catch (error) {
+        if (!/[a-fA-F0-9]{24}/.test(conversationId)) {
+            return NextResponse.json({message: "Invalid conversationId format."}, {status: 400});
+        }
         return NextResponse.json({message: "Internal Server Error"}, {status: 500})
     }
 
@@ -77,8 +82,8 @@ export async function POST(request: Request) {
 }
 
 // Test: Does it pass these?
-// 1. Must be logged in (PASS)
-// 2. Are the required fields provided? (PASS)
-// 3. Users cannot send a message to a conversation that does not exist (PASS)
-// 4. Only a message can be sent in a conversation that a user is in (PASS)
-// 5. Is there a current user? (PASS)
+// 1. Must be logged in (PASS) (TESTED)
+// 2. Are the required fields provided? (PASS) (TESTED)
+// 3. Users cannot send a message to a conversation that does not exist (PASS) (TESTED)
+// 4. Only a message can be sent in a conversation that a user is in (PASS) (TESTED)
+// 5. Is there a current user? (PASS) (TESTED)

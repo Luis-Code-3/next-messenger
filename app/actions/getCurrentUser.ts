@@ -13,6 +13,15 @@ const getCurrentUser = async () => {
         const currentUser = await prisma.user.findUnique({
             where: {
                 email: session.user.email
+            },
+            select: {
+                id: true,
+                email: true,
+                username: true,
+                conversationIds: true,
+                pinnedIds: true,
+                image: true,
+                role: true
             }
         });
 
@@ -28,3 +37,5 @@ const getCurrentUser = async () => {
 }
 
 export default getCurrentUser;
+
+// select here

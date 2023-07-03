@@ -13,7 +13,7 @@ export async function POST(request:Request) {
     }
 
     // Checks to see if user is logged out / confirms whether a currentUser exists
-    if(currentUser?.id) return NextResponse.json({message: "You are already registered."}, {status: 400});
+    if(currentUser?.id) return NextResponse.json({message: "You are already registered."}, {status: 409});
 
     try {
         const existUser = await prisma.user.findFirst({
@@ -26,12 +26,15 @@ export async function POST(request:Request) {
                         username: username
                     }
                 ]
+            },
+            select: {
+                username: true
             }
         });
 
         // Checks to see if an account with the provided username or email already exists
         if(existUser) {
-            return NextResponse.json({message: "User already exists"}, {status: 400})
+            return NextResponse.json({message: "User already exists"}, {status: 409})
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -42,6 +45,9 @@ export async function POST(request:Request) {
                 email,
                 hashedPassword,
                 name
+            },
+            select: {
+                username: true
             }
         });
 
@@ -53,7 +59,7 @@ export async function POST(request:Request) {
 }
 
 // Test: Does it pass these?
-// 1. Must be logged out in order to access (PASS)
-// 2. Cannot create an account with an existing username or email. (PASS)
-// 3. Is there not a current user (PASS)
-// 4. Are all required fields provided? (PASS)
+// 1. Must be logged out in order to access (PASS) (TESTED)
+// 2. Cannot create an account with an existing username or email. (PASS) (TESTED)
+// 3. Is there not a current user (PASS) (TESTED)
+// 4. Are all required fields provided? (PASS) (TESTED)

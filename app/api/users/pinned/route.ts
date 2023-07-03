@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     try {
 
         // Checks to see if a user is a logged in / there is a current user
-        if(!currentUser?.id) return NextResponse.json({message: "Not Authorized"}, {status: 400});
+        if(!currentUser?.id) return NextResponse.json({message: "Not Authorized"}, {status: 401});
 
         // Checks to see if required ConversationId field was provided
         if(!conversationId) {
@@ -20,20 +20,24 @@ export async function POST(request: Request) {
             where: {
                 id: conversationId
             },
-            include: {
-                members: true
+            select: {
+                memberIds: true,
+                pinnedByUserIds: true
             }
         });
 
         // Checks to see if conversation exists
         if(!existingConversation) {
-            return NextResponse.json({message: "Conversation does not exist."}, {status: 400})
+            return NextResponse.json({message: "Conversation does not exist."}, {status: 404})
         }
 
         // Checks to see if current user is apart of the conversation
-        if(!existingConversation.members.some((member) => member.email === currentUser?.email)) {
-            return NextResponse.json({message: "You cannot pin a conversation you are not apart of."}, {status: 401})
+        if(!existingConversation.memberIds.some((memberId) => memberId === currentUser?.id)) {
+            return NextResponse.json({message: "You cannot pin a conversation you are not apart of."}, {status: 403})
         }
+
+        // Checks to see if the conversation is already pinned by current user
+        if(existingConversation.pinnedByUserIds.includes(currentUser.id)) return NextResponse.json({message: "Already pinned this conversation"}, {status: 409})
 
         const updateUser = await prisma.user.update({
             where: {
@@ -49,21 +53,22 @@ export async function POST(request: Request) {
                     }
                 }
             },
-            include: {
-                pinned: true
+            select: {
+                username: true
             }
         });
 
-        return NextResponse.json({message: "Conversation was Pinned"}, {status: 201});
+        return NextResponse.json({message: "Conversation was Pinned"}, {status: 200});
     } catch (error) {
         return NextResponse.json({message: "Internal Server Error"}, {status: 500});
     }
 }
 
 // Test: Does it pass these?
-// 1. Must be logged in (PASS)
-// 2. Does conversation exist? (PASS)
-// 3. Was a conversationId provided (PASS)
-// 4. Other users cannot pin a conversation for you (PASS)
-// 5. Only conversations a user is in can be pinned (PASS)
-// 6. Is there a current user (PASS)
+// 1. Must be logged in (PASS) (TESTED)
+// 2. Does conversation exist? (PASS) (TESTED)
+// 3. Was a conversationId provided (PASS) (TESTED)
+// 4. Other users cannot pin a conversation for you (PASS) (TESTED)
+// 5. Only conversations a user is in can be pinned (PASS) (TESTED)
+// 6. Is there a current user (PASS) (TESTED)
+// 7. only can pin a conversation which hasnt already be pinned (PASS) (TESTED)

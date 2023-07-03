@@ -26,7 +26,7 @@ const LoginForm = () => {
                     toast.error(callback?.error);
                 }
 
-                if(callback?.ok && (callback?.error === "OAuthAccountNotLinked" || callback?.error === "access_denied")) {
+                if(callback?.ok && (callback?.error === "OAuthAccountNotLinked" || callback?.error === "access_denied" || callback?.error === "Callback")) {
                   setIsNavigating(true); // might remove this, this is to prevent isLoading false flicker
                   window.location.href = '/dashboard';
                 } // needed to add this because of a bug that was created when the url has an error query, ends up showing in the callback object
