@@ -24,7 +24,7 @@ const SetUsernameForm = () => {
             await axios.post("http://localhost:3000/api/users/changeUsername", {username, email});
             await update({username});
             setIsNavigating(true); //might remove, same reason as others. Might be okay to accep t the flicker
-            router.push('/dashboard')
+            router.push('/dashboard/conversations')
         } catch (err: any) {
             toast.error(err.response.data.message)
         } finally {

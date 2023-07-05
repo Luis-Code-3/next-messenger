@@ -56,6 +56,8 @@ export default withAuth(
             if (isAuth.isNewUser) {
                 return NextResponse.redirect(new URL('/setUsername', req.nextUrl))
             }
+
+            if(pathname === '/dashboard') return NextResponse.redirect(new URL('/dashboard/conversations', req.nextUrl))
         }
 
         if (pathname === '/setUsername') {

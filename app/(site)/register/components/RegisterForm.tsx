@@ -22,7 +22,7 @@ const RegisterForm = () => {
         try {
             await axios.post("http://localhost:3000/api/users/register", {username, email, name, password});
             setIsNavigating(true); //might remove cause it could cause issues if there is an error via signIn
-            signIn('credentials', {email, password, callbackUrl: '/dashboard'})
+            signIn('credentials', {email, password, callbackUrl: '/dashboard/conversations'})
         } catch (err: any) {
             toast.error(err.response.data.message)
         } finally {
@@ -34,7 +34,7 @@ const RegisterForm = () => {
     const socialLogin = async (action: string) => {
         setIsLoading(true);
         setIsNavigating(true);
-        signIn(action, {callbackUrl: '/dashboard'})
+        signIn(action, {callbackUrl: '/dashboard/converations'})
         .finally(() => {
             setIsLoading(false);
         })

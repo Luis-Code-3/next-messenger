@@ -28,12 +28,12 @@ const LoginForm = () => {
 
                 if(callback?.ok && (callback?.error === "OAuthAccountNotLinked" || callback?.error === "access_denied" || callback?.error === "Callback")) {
                   setIsNavigating(true); // might remove this, this is to prevent isLoading false flicker
-                  window.location.href = '/dashboard';
+                  window.location.href = '/dashboard/conversations';
                 } // needed to add this because of a bug that was created when the url has an error query, ends up showing in the callback object
 
                 if(callback?.ok && !callback?.error) {
                     setIsNavigating(true); // might remove this, this is to prevent isLoading false flicker
-                    window.location.href = '/dashboard';
+                    window.location.href = '/dashboard/conversations';
                 }
             })
             .finally(() => {
@@ -45,7 +45,7 @@ const LoginForm = () => {
     const socialLogin = async (action: string) => {
         setIsLoading(true);
         setIsNavigating(true); //might need to handle signIn error
-        signIn(action, {callbackUrl: '/dashboard'})
+        signIn(action, {callbackUrl: '/dashboard/conversations'})
             .finally(() => {
                 setIsLoading(false);
             })
