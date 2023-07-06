@@ -19,13 +19,14 @@ const getConversations = async () => {
                 }
             },
             include: {
-                members: true
+                members: true,
+                messages: true
             }
         });
         return conversations;
     } catch (err) {
         console.log(err);
-        return null
+        return []
     }
 }
 

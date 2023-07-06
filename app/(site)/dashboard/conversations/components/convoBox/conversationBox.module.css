@@ -1,0 +1,41 @@
+.boxContainer {
+    /* border: 1px solid yellow; */
+    padding: 1.5rem 1rem;
+    display: flex;
+    gap: 1rem;
+    /* width: 100%; */
+    width: 27vw;
+    transition: all .1s linear;
+}
+
+.boxContainer:hover {
+    cursor: pointer;
+    background-color: rgba(49, 45, 65, 0.6);
+}
+
+.image {
+    background-color: rgb(186, 149, 202);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.nameAndMessage {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    flex-grow: 1;
+}
+
+.nameAndMessage p {
+    width: 16vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgb(255, 255, 255, .5);
+}
+
+.time {
+    /* border: 1px solid red; */
+    font-size: 70%;
+}

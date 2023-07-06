@@ -1,0 +1,13 @@
+.conversationAllContainer {
+    /* border: 1px solid red; */
+    display: flex;
+    flex-grow: 1;
+}
+
+.emptyContainer {
+    /* border: 1px solid white; */
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

@@ -1,0 +1,31 @@
+.convoNavContainer {
+    height: 100vh;
+    padding-top: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-right: 2px solid rgb(223, 203, 247, .1);
+    background-color: rgb(29, 26, 40, .6);
+}
+
+.messages {
+    padding-left: 1rem;
+}
+
+.convoList {
+    overflow-y: auto;
+    height: 100%;
+}
+
+.convoList::-webkit-scrollbar {
+    width: 5px;
+}
+
+.convoList::-webkit-scrollbar-thumb {
+    background-color: rgba(72, 66, 94, 0.6);; /* Set the color of the scrollbar thumb */
+    border-radius: 30px;
+}
+  
+.convoList::-webkit-scrollbar-track {
+    background-color: transparent; /* Set the color of the scrollbar track */
+}
